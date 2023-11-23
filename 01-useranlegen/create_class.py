@@ -11,8 +11,6 @@ def read_excel(file: str):
     :return: lines of file
     """
 
-    print("helou")
-
     wb = load_workbook(file, read_only=True)
     ws = wb[wb.sheetnames[0]]
     for row in ws.iter_rows(min_row=1):
@@ -42,11 +40,11 @@ def create_bash_file(filename):
         for script_line, script_line_password, usr_name in create_users(filename):
             script.write(script_line + script_line_password)
 
-    with open("del_script.sh", "w") as del_script:
+    with open("del_class_script.sh", "w") as del_script:
         for script_line in del_users(filename):
             del_script.write(script_line)
 
-    with open("user_pw_list.txt", "w") as list:
+    with open("class_pw_list.txt", "w") as list:
         for script_line in user_pw_list(filename):
             list.write(script_line)
 
@@ -55,11 +53,11 @@ def create_bash_file(filename):
 def create_users(filename: str):
     excel = read_excel(filename)
     excel.__next__()
+    rand_chars = ["!", "%", "&", "(", ")", ",", ".", "_", "-", "=", "^", "#"]
     for line in excel:
         usr_name = "k"+line[0].lower()
-        rand_chars = ["!", "%", "&", "(", ")", ",", ".", "_", "-", "=", "^", "#"]
         script_line = f"useradd -d /home/klassen/{usr_name} -c {usr_name} -m -g {line[0]} -G cdrom,plugdev,sambashare -s /bin/bash {usr_name}\n"
-        script_line_password = f"echo {line[0]}:" + str(line[0]) + random.choice(rand_chars) + str(line[1]) + random.choice(rand_chars) + line[2] + random.choice(rand_chars) + " | chpasswd\n\n"
+        script_line_password = f"echo {line[0]}:" + str(line[0]) + "\\" + random.choice(rand_chars) + str(line[1]) + "\\" + random.choice(rand_chars) + line[2] + "\\" + random.choice(rand_chars) + " | chpasswd\n\n"
         yield script_line, script_line_password, usr_name
     script_line = "useradd -d /home/lehrer/lehrer -c lehrer -m -g lehrer -G cdrom,plugdev,sambashare -s /bin/bash lehrer\n"
     script_line_password = f"echo lehrer:0{random.choice(rand_chars)}0{random.choice(rand_chars)}0{random.choice(rand_chars)} | chpasswd\n\n"
@@ -80,7 +78,7 @@ def del_users(filename: str):
 
 def user_pw_list(filename: str):
     for script_line, script_line_password, usr_name in create_users(filename):
-        pw = script_line_password.split()[1].split(':')[1]
+        pw = script_line_password.split()[1].split(':')[1].replace('\\', '')
         script_line = f"{usr_name}: {pw}\n"
         yield script_line
 
