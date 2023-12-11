@@ -2,6 +2,7 @@ import argparse
 import random
 import string
 
+import openpyxl
 import unicodedata
 from openpyxl import load_workbook
 
@@ -65,6 +66,25 @@ def del_users(filename: str):
         yield script_line
 
 
+def user_list(filename: str):
+    excel = read_excel(filename)
+    excel.__next__()
+
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+
+    sheet['A1'] = 'username'
+    sheet['B1'] = 'password'
+
+    for index, line in enumerate(create_users(filename), start=2):
+        usr_name = line[0].split()[-1]
+        password = line[1].split(':')[1].split()[0]
+        sheet[f'A{index}'] = usr_name
+        sheet[f'B{index}'] = password
+
+    workbook.save("user-password-list.xlsx")
+
+
 def write_bash_file(filename: str):
     with open("user_script.sh", "w") as script:
         for line in create_users(filename):
@@ -73,6 +93,8 @@ def write_bash_file(filename: str):
     with open("del_user_script.sh", "w") as del_script:
         for script_line in del_users(filename):
             del_script.write(script_line)
+
+    user_list(filename)
 
 
 def make_parser():
