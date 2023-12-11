@@ -52,7 +52,7 @@ def create_users(filename: str):
             group = line[3]
             directory = f"/home/students/{usr_name}"
 
-        password = ''.join("\\" + random.choice(rand_chars) for _ in range(6))
+        password = "a" + ''.join("\\" + random.choice(rand_chars) for _ in range(6))
 
         script_line = f"useradd -d {directory} -c {usr_name} -m -g {group} -G cdrom,plugdev,sambashare -s /bin/bash {usr_name}\n"
         password_line = f"echo {usr_name}:{password} | chpasswd\n\n"
@@ -69,44 +69,38 @@ def del_users(filename: str):
         yield script_line
 
 
-# def user_list(username: str, password: str, index: int):
-    # excel = read_excel(filename)
-    # excel.__next__()
-
-
-
-
-def user_txt_list(filename: str):
-    pass
-
-
-def write_bash_file(filename: str):
-    index: int = 2
-
+def user_list(filename, data):
     workbook = openpyxl.Workbook()
     sheet = workbook.active
+    index = 2
+
+    for line, password_line, password, username in data:
+        sheet['A1'] = 'username'
+        sheet['B1'] = 'password'
+
+        sheet[f'A{index}'] = username
+        sheet[f'B{index}'] = password.replace("\\", "")
+
+        index += 1
+    workbook.save(filename)
+
+
+def user_txt_list(filename: str, data):
+    with open(filename, "w") as usr_pw_list:
+        for line, password_line, password, username in data:
+            password = password.replace("\\", "")
+            usr_pw_list.write(f"{username}: {password}\n")
+
+
+def write_bash_file(create_data, del_data):
 
     with open("user_script.sh", "w") as script:
-        for line, password_line, password, username in create_users(filename):
-            sheet['A1'] = 'username'
-            sheet['B1'] = 'password'
-
-            sheet[f'A{index}'] = username
-            sheet[f'B{index}'] = password
-
+        for line, password_line, password, username in create_data:
             script.write(line + password_line)
-            index += 1
-        workbook.save("user-password-list.xlsx")
 
     with open("del_user_script.sh", "w") as del_script:
-        for script_line in del_users(filename):
+        for script_line in del_data:
             del_script.write(script_line)
-
-    # if txtfile == False:
-    #     user_list(filename)
-
-#    else:
-#        user_txt_list(filename)
 
 
 def make_parser():
@@ -117,21 +111,24 @@ def make_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("filename")
     # parser.add_argument("-v", "--verbose", help="increase  output verbosity")
-    # parser.add_argument("-x", "--excel", help="write created users and passwords in excel file")
-    # parser.add_argument("-t", "--txt", help="write created users and passwords in txt file")
+    parser.add_argument("-x", "--excel", help="write created users and passwords in excel file", action="store_true")
+    parser.add_argument("-t", "--txt", help="write created users and passwords in txt file", action="store_true")
     args = parser.parse_args()
 
     # if args.verbose:
     #     print("verbosity turned on")
 
-    # if args.excel:
-    #     txtfile = False
+    users = list(create_users(args.filename))
 
-    # if args.txt:
-    #     txtfile = True
+    if args.txt:
+        user_txt_list("outputfilename.txt", users)
+
+    if args.excel:
+        user_list("outputfilename.xlsx", users)
 
     if args.filename:
-        write_bash_file(args.filename)
+        write_bash_file(users, del_users(args.filename))
+
 
 
 
