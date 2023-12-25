@@ -1,13 +1,18 @@
+# Sofia Angerer
+
 import argparse
+import logging
 import random
-import string
+import sys
+from logging.handlers import RotatingFileHandler
+from plistlib import InvalidFileException
 
 import openpyxl
 import unicodedata
 from openpyxl import load_workbook
 
 txtfile: bool = False
-
+logger = logging.getLogger("logger")
 
 def read_excel(file: str):
     """
@@ -16,32 +21,48 @@ def read_excel(file: str):
     :return: lines of file
     """
 
-    wb = load_workbook(file, read_only=True)
-    ws = wb[wb.sheetnames[0]]
-    for row in ws.iter_rows(min_row=1):
-        firstname = row[0].value
-        lastname = row[1].value
-        type_name = row[2].value
-        class_name = row[3].value
+    try:
+        logger.debug("reading excel file")
 
-        if firstname is not None and lastname is not None and type is not None:
-            yield firstname, lastname, type_name, class_name
+        wb = load_workbook(file, read_only=True)
+        ws = wb[wb.sheetnames[0]]
+        existing_users = []
+        for row in ws.iter_rows(min_row=1):
+            firstname = row[0].value
+            lastname = row[1].value
+            type_name = row[2].value
+            class_name = row[3].value
+
+            if (firstname, lastname, type_name, class_name) in existing_users:
+                print(f"User {firstname} {lastname} has already been created... you cannot create it again... what are you thinking...?")
+            elif firstname is not None and lastname is not None and type is not None:
+                existing_users.append((firstname, lastname, type_name, class_name))
+                yield firstname, lastname, type_name, class_name
+    except Exception:
+        logger.error(f"file {file} not found :(")
+        raise InvalidFileException
 
 
 def create_users(filename: str):
+    """
+    Generates the necessary lines to create a create-user-script
+    :param filename: excel file
+    :return:
+
+    >>>
+    """
     excel = read_excel(filename)
     excel.__next__()
     usr_names = []
     rand_chars = ["!", "%", "&", "(", ")", ",", ".", "_", "-", "=", "^", "#"]
     for line in excel:
-       # print(line[1])
-        usr_name = line[1].lower().replace(" ", "_").replace('ß', 'ss').replace('ö', 'oe').replace('ä', 'ae').replace('ü', 'ue')
-        usr_name = shave_marks(usr_name)
-        i = 1
-        while usr_name in usr_names:
-            usr_name = shave_marks(line[1].lower()).replace(" ", "_")
-            usr_name = usr_name+str(i)
-            i += 1
+        usr_name = line[1].lower().replace(" ", "_").replace('ß', 'ss').replace('ö', 'oe').replace('ä', 'ae').replace(
+            'ü', 'ue')
+        usr_name = shave_marks(line[1].lower()).replace(" ", "_")
+
+        if usr_name in usr_names:
+            handle_same_names(usr_names, usr_name)
+
         usr_names.append(usr_name)
 
         if line[2] == "teacher":
@@ -57,10 +78,37 @@ def create_users(filename: str):
         script_line = f"useradd -d {directory} -c {usr_name} -m -g {group} -G cdrom,plugdev,sambashare -s /bin/bash {usr_name}\n"
         password_line = f"echo {usr_name}:{password} | chpasswd\n\n"
 
+        logger.debug(f"generating user {usr_name}")
+
         yield script_line, password_line, password, usr_name
 
 
+def handle_same_names(usr_names: [], usr_name):
+    """
+    appends an increasing number to name if the name is already taken
+    :param usr_names: list of user names already existing
+    :param usr_name: user name that is already taken
+    :return: user name with correct number appended
+
+    >>> handle_same_names(["heinz", "heinz1", "huber", "huber1", "huber2"], "huber")
+    ["heinz", "heinz1", "huber", "huber1", "huber2", "huber3"]
+    """
+    usr_names.count(usr_name)
+    i = 1
+    while usr_name in usr_names:
+        usr_name = usr_name + str(i)
+        i += 1
+    return usr_name
+
+
 def del_users(filename: str):
+    """
+    Generates the necessary lines to create a del-user-script
+    :param filename: excel file
+    :return:
+    """
+    logger.debug("creating del_user_script")
+
     excel = read_excel(filename)
     excel.__next__()
     for line in create_users(filename):
@@ -70,6 +118,12 @@ def del_users(filename: str):
 
 
 def user_list(filename, data):
+    """
+    generates an excel file with the user names and the corresponding passwords
+    :param filename: name of the file being generated
+    :param data: user information
+    """
+    logger.debug("creating user-password-list")
     workbook = openpyxl.Workbook()
     sheet = workbook.active
     index = 2
@@ -86,6 +140,11 @@ def user_list(filename, data):
 
 
 def user_txt_list(filename: str, data):
+    """
+    generates a text file with user names and the corresponding passwords
+    :param filename: name of the file being generated
+    :param data: user information
+    """
     with open(filename, "w") as usr_pw_list:
         for line, password_line, password, username in data:
             password = password.replace("\\", "")
@@ -93,7 +152,12 @@ def user_txt_list(filename: str, data):
 
 
 def write_bash_file(create_data, del_data):
-
+    """
+    uses the given lines to generate user-script and del-user-script
+    :param create_data:
+    :param del_data:
+    :return:
+    """
     with open("user_script.sh", "w") as script:
         for line, password_line, password, username in create_data:
             script.write(line + password_line)
@@ -104,19 +168,27 @@ def write_bash_file(create_data, del_data):
 
 
 def make_parser():
-    '''
+    """
     creates parser to execute function on command line
-    '''
+    """
+
+    create_logger()
 
     parser = argparse.ArgumentParser()
     parser.add_argument("filename")
-    # parser.add_argument("-v", "--verbose", help="increase  output verbosity")
+    parser.add_argument("-v", "--verbose", help="increase output verbosity", action="store_true")
+    parser.add_argument("-q", "--quiet", help="decrease output verbosity")
     parser.add_argument("-x", "--excel", help="write created users and passwords in excel file", action="store_true")
     parser.add_argument("-t", "--txt", help="write created users and passwords in txt file", action="store_true")
     args = parser.parse_args()
 
-    # if args.verbose:
-    #     print("verbosity turned on")
+    if args.verbose:
+        print("verbosity turned on")
+        logger.setLevel(logging.DEBUG)
+
+    if args.quiet:
+        print("verbosity turned off")
+        logger.setLevel(logging.NOTSET)
 
     users = list(create_users(args.filename))
 
@@ -130,11 +202,23 @@ def make_parser():
         write_bash_file(users, del_users(args.filename))
 
 
-
+def create_logger():
+    """
+    creates logger necessary for logging
+    """
+    rotating_fh = RotatingFileHandler('create-user.log', maxBytes=10_000, backupCount=5)
+    stream_h = logging.StreamHandler(sys.stdout)
+    logger.addHandler(rotating_fh)
+    logger.addHandler(stream_h)
 
 
 def shave_marks(txt):
-    """Remove all diacritic marks"""
+    """Remove all diacritic marks
+    >>> shave_marks("Zöë")
+    'Zoe'
+    >>> shave_marks("î lövé sëw")
+    'i love sew'
+    """
     norm_txt = unicodedata.normalize('NFD', txt)
     shaved = ''.join(c for c in norm_txt
                      if not unicodedata.combining(c))
