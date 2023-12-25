@@ -63,7 +63,7 @@ def create_users(filename: str):
         if usr_name in usr_names:
             handle_same_names(usr_names, usr_name)
 
-        usr_names.append(usr_name)
+        usr_names.append(line[1])
 
         if line[2] == "teacher":
             group = "teacher"
@@ -83,22 +83,25 @@ def create_users(filename: str):
         yield script_line, password_line, password, usr_name
 
 
-def handle_same_names(usr_names: [], usr_name):
+def handle_same_names(lastnames: [], usr_name):
     """
     appends an increasing number to name if the name is already taken
-    :param usr_names: list of user names already existing
-    :param usr_name: user name that is already taken
+    :param lastnames: list of last names already existing
+    :param usr_name: last name that is already taken
     :return: user name with correct number appended
 
-    >>> handle_same_names(["heinz", "heinz1", "huber", "huber1", "huber2"], "huber")
-    ["heinz", "heinz1", "huber", "huber1", "huber2", "huber3"]
+    >>> handle_same_names(["heinz", "heinz1", "huber", "huber", "huber"], "huber")
+    'huber3'
+    >>> handle_same_names(["heinz", "heinz", "huber", "huber", "huber"], "heinz")
+    'heinz2'
+    >>> handle_same_names(["heinz", "heinz", "huber", "huber", "huber"], "garfield")
+    'garfield'
     """
-    usr_names.count(usr_name)
-    i = 1
-    while usr_name in usr_names:
-        usr_name = usr_name + str(i)
-        i += 1
-    return usr_name
+    if usr_name not in lastnames:
+        return usr_name
+
+    count = lastnames.count(usr_name)
+    return f"{usr_name}{count}"
 
 
 def del_users(filename: str):
