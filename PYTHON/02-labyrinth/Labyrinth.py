@@ -23,7 +23,24 @@ def suchen(zeile: int, spalte: int, lab: [[str]]):
         return False
 
 
+def suchenAlle(zeile: int, spalte: int, lab: [[str]]):
+    x = lab[zeile][spalte]
+    if x == 'A':
+        return 1
+    elif x != ' ':
+        return 0
+
+    lab[zeile] = lab[zeile][:spalte] + 'x' + lab[zeile][spalte + 1:]
+    result = suchenAlle(zeile+1, spalte, lab) + \
+             suchenAlle(zeile-1, spalte, lab) + \
+             suchenAlle(zeile, spalte+1, lab) + \
+             suchenAlle(zeile, spalte-1, lab)
+
+    lab[zeile] = lab[zeile][:spalte] + ' ' + lab[zeile][spalte + 1:]
+    return result
+
+
 if __name__ == '__main__':
-    lab: [str] = from_file("resources/l1.txt")
+    lab: [str] = from_file("resources/l2.txt")
     print_labyrinth(lab)
-    print("Ausgang gefunden:", suchen(5, 5, lab))
+    print("Anzahl gefunden:", suchenAlle(5, 5, lab))
