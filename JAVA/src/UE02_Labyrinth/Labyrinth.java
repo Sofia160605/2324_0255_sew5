@@ -140,7 +140,14 @@ public class Labyrinth {
         }
     }
 
-    public static int suchenAlle(int zeile, int spalte, char[][] lab) throws InterruptedException {
+    /***
+     * Findet alle möglichen Wege aus dem Labyrinth und zählt sie
+     * @param zeile     aktuelle Position
+     * @param spalte    aktuelle Position
+     * @param lab       labyrinth, aus dem heraus gefunden werden soll
+     * @return          anzahl an wegen nach draußen
+     */
+    public static int suchenAlle(int zeile, int spalte, char[][] lab) {
         char x = lab[zeile][spalte];
         if (x == 'A') {
             return 1;
@@ -166,6 +173,6 @@ public class Labyrinth {
         char[][] labyrinth = fromStrings(maps[2]);
         printLabyrinth(labyrinth);
         //System.out.println("Ausgang gefunden: " + (suchen(5, 5, labyrinth) ? "ja" : "nein"));
-        //System.out.println("Anzahl Wege: " + suchenAlle(5, 5, labyrinth));
+        System.out.println("Anzahl Wege: " + suchenAlle(5, 5, labyrinth));
     }
 }
