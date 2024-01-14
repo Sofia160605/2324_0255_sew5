@@ -56,14 +56,15 @@ def create_users(filename: str):
     usr_names = []
     rand_chars = ["!", "%", "&", "(", ")", ",", ".", "_", "-", "=", "^", "#"]
     for line in excel:
-        usr_name = line[1].lower().replace(" ", "_").replace('ß', 'ss').replace('ö', 'oe').replace('ä', 'ae').replace(
+        lastname = line[1]
+        usr_name = lastname.lower().replace(" ", "_").replace('ß', 'ss').replace('ö', 'oe').replace('ä', 'ae').replace(
             'ü', 'ue')
-        usr_name = shave_marks(line[1].lower()).replace(" ", "_")
+        usr_name = shave_marks(usr_name.lower()).replace(" ", "_")
 
-        if usr_name in usr_names:
-            handle_same_names(usr_names, usr_name)
+        if lastname in usr_names:
+            usr_name = handle_same_names(usr_names, lastname)
 
-        usr_names.append(line[1])
+        usr_names.append(lastname)
 
         if line[2] == "teacher":
             group = "teacher"
@@ -97,9 +98,6 @@ def handle_same_names(lastnames: [], usr_name):
     >>> handle_same_names(["heinz", "heinz", "huber", "huber", "huber"], "garfield")
     'garfield'
     """
-    if usr_name not in lastnames:
-        return usr_name
-
     count = lastnames.count(usr_name)
     return f"{usr_name}{count}"
 
@@ -180,7 +178,7 @@ def make_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("filename")
     parser.add_argument("-v", "--verbose", help="increase output verbosity", action="store_true")
-    parser.add_argument("-q", "--quiet", help="decrease output verbosity")
+    parser.add_argument("-q", "--quiet", help="decrease output verbosity", action="store_true")
     parser.add_argument("-x", "--excel", help="write created users and passwords in excel file", action="store_true")
     parser.add_argument("-t", "--txt", help="write created users and passwords in txt file", action="store_true")
     args = parser.parse_args()
@@ -199,7 +197,7 @@ def make_parser():
         user_txt_list("outputfilename.txt", users)
 
     if args.excel:
-        user_list("outputfilename.xlsx", users)
+        user_list("userlist.xlsx", users)
 
     if args.filename:
         write_bash_file(users, del_users(args.filename))

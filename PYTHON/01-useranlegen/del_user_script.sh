@@ -32,8 +32,8 @@ userdel -r gundry
 userdel -r pinedo
 userdel -r faivre
 userdel -r pinsky
-userdel -r pinsky1
-userdel -r pinsky2
-userdel -r pinsky3
+userdel -r Pinsky1
+userdel -r Pinsky2
+userdel -r Pinsky3
 userdel -r norlien
 userdel -r preato
