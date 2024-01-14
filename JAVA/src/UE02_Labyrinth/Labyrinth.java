@@ -124,7 +124,6 @@ public class Labyrinth {
      * @throws InterruptedException    für die verlangsamte Ausgabe mit sleep()
      */
     public static boolean suchen(int zeile, int spalte, char[][] lab) throws InterruptedException {
-        // TODO Code fehlt noch
         char x = lab[zeile][spalte];
         if (x == 'A') {
             return true;
@@ -141,7 +140,27 @@ public class Labyrinth {
         }
     }
 
+    public static int suchenAlle(int zeile, int spalte, char[][] lab) throws InterruptedException {
+        char x = lab[zeile][spalte];
+        if (x == 'A') {
+            return 1;
+        } else if (x != ' '){
+            return 0;
+        }
 
+
+        lab[zeile][spalte] = 'T';
+        int result = suchenAlle(zeile+1, spalte, lab) +
+                suchenAlle(zeile-1, spalte, lab) +
+                suchenAlle(zeile, spalte+1, lab) +
+                suchenAlle(zeile, spalte-1, lab);
+
+
+        lab[zeile][spalte] = ' ';
+
+        return result;
+
+    }
 
     public static void main(String[] args) throws InterruptedException {
         char[][] labyrinth = fromStrings(maps[2]);
