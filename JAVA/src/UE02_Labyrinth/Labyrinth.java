@@ -116,6 +116,31 @@ public class Labyrinth {
         }
     }
 
+    /**
+     * Suche den Weg
+     * @param zeile     aktuelle Position
+     * @param spalte     aktuelle Position
+     * @param lab
+     * @throws InterruptedException    für die verlangsamte Ausgabe mit sleep()
+     */
+    public static boolean suchen(int zeile, int spalte, char[][] lab) throws InterruptedException {
+        // TODO Code fehlt noch
+        char x = lab[zeile][spalte];
+        if (x == 'A') {
+            return true;
+        } else if (x == ' ') {
+            lab[zeile][spalte] = 'T';
+            printLabyrinth(lab);
+            //Thread.sleep(1000);
+            return suchen(zeile+1, spalte, lab) ||
+                    suchen(zeile, spalte+1, lab) ||
+                    suchen(zeile-1, spalte, lab) ||
+                    suchen(zeile, spalte-1, lab);
+        } else {
+            return false;
+        }
+    }
+
 
 
     public static void main(String[] args) throws InterruptedException {
