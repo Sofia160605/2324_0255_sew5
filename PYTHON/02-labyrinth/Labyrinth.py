@@ -1,3 +1,5 @@
+# author: Sofia Angerer
+
 import argparse
 import cProfile
 from time import sleep
@@ -5,17 +7,29 @@ from time import sleep
 do_print: bool = False
 delay = 0
 
+
 def from_file(filename: str):
+    """
+    reads a labyrinth from a file
+    :param filename: file to read the lab from
+    """
     with open(filename, "r") as f:
         return f.readlines()
 
 
 def print_labyrinth(lab: [str]):
+    """
+    prints lab line by line
+    :param lab: lab to be printed
+    """
     for line in lab:
         print(line.strip())
 
 
 def suchen(zeile: int, spalte: int, lab: [[str]]):
+    """
+    finds a way out of the given labyrinth
+    """
     x = lab[zeile][spalte]
     if x == 'A':
         return True
@@ -31,7 +45,10 @@ def suchen(zeile: int, spalte: int, lab: [[str]]):
 
 
 def suchen_alle(zeile: int, spalte: int, lab: [[str]]):
-
+    """
+    finds all possible ways out of the giben lab and counts the number of ways
+    :return: number of possible ways out of the lab
+    """
     x = lab[zeile][spalte]
     if x == 'A':
         if do_print:
@@ -52,6 +69,9 @@ def suchen_alle(zeile: int, spalte: int, lab: [[str]]):
 
 
 def make_parser():
+    """
+    creates a parser to enable the program to be executed from the command line
+    """
     global do_print
 
     parser = argparse.ArgumentParser()
@@ -73,6 +93,9 @@ def make_parser():
 
 
 def run_all():
+    """
+    runs suchen_alle for 3 different labs
+    """
     lab1 = from_file("resources/l1.txt")
     lab2 = from_file("resources/l2.txt")
     lab3 = from_file("resources/l3.txt")
