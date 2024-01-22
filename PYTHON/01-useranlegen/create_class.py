@@ -1,3 +1,5 @@
+# Sofia Angerer
+
 import argparse
 import random
 
@@ -36,11 +38,15 @@ def make_parser():
 
 
 def create_bash_file(filename):
+    """
+    writes lines from create_users into the class-script
+    :param filename: file to read from (excel)
+    """
     with open("class_script.sh", "w") as script:
         with open("user-pw-list.txt", "w") as usr_pw_list:
             for script_line, script_line_password, usr_name, password in create_users(filename):
-                print(script_line_password)
-                print(password + "\n")
+                # print(script_line_password)
+                # print(password + "\n")
                 script.write(script_line + script_line_password)
                 usr_pw_list.write(f"{usr_name}: {password}\n")
 
@@ -54,6 +60,10 @@ def create_bash_file(filename):
 
 
 def create_users(filename: str):
+    """
+    writes the lines necessary for the class-script-file
+    :param filename: file to read from
+    """
     excel = read_excel(filename)
     excel.__next__()
     rand_chars = ["!", "%", "&", "(", ")", ",", ".", "_", "-", "=", "^", "#"]
@@ -74,6 +84,11 @@ def create_users(filename: str):
 
 
 def del_users(filename: str):
+    """
+    writes line for the del-users-script
+    :param filename: filename to read from
+    :return: line to be written in del-script
+    """
     excel = read_excel(filename)
     excel.__next__()
     for line in excel:

@@ -48,8 +48,6 @@ def create_users(filename: str):
     Generates the necessary lines to create a create-user-script
     :param filename: excel file
     :return:
-
-    >>>
     """
     excel = read_excel(filename)
     excel.__next__() # zeile überspringen
@@ -194,7 +192,7 @@ def make_parser():
     users = list(create_users(args.filename))
 
     if args.txt:
-        user_txt_list("outputfilename.txt", users)
+        user_txt_list("userlist.txt", users)
 
     if args.excel:
         user_list("userlist.xlsx", users)

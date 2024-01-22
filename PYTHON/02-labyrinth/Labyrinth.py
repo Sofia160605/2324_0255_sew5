@@ -76,8 +76,8 @@ def make_parser():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("filename")
-    parser.add_argument("-x", "--xstart", help="x-coordinate to start", action="store_true")
-    parser.add_argument("-y", "--ystart", help="y-coordinate to start", action="store_true")
+    parser.add_argument("-x", "--xstart", help="x-coordinate to start")
+    parser.add_argument("-y", "--ystart", help="y-coordinate to start")
     parser.add_argument("-p", "--print", help="print output of every solution", action="store_true")
     parser.add_argument("-t", "--time", help="print total calculation time (in milliseconds)", action="store_true")
     parser.add_argument("-d", "--delay", help="delay after printing a solution (in milliseconds)", action="store_true")
@@ -89,7 +89,7 @@ def make_parser():
         ystart = args.ystart if args.ystart else 1
         delay = args.delay
         do_print = args.print
-        print(suchen_alle(xstart, ystart, lab))
+        print(suchen_alle(int(xstart), int(ystart), lab))
 
 
 def run_all():
@@ -105,10 +105,10 @@ def run_all():
 
 
 if __name__ == '__main__':
-    cProfile.run("run_all()")
-    print("done")
+    # cProfile.run("run_all()")
+    # print("done")
 
-    # make_parser()
+    make_parser()
     # lab: [str] = from_file("resources/l2.txt")
     # print_labyrinth(lab)
     # print("Anzahl gefunden:", suchenAlle(5, 5, lab))
