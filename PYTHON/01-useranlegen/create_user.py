@@ -52,7 +52,7 @@ def create_users(filename: str):
     >>>
     """
     excel = read_excel(filename)
-    excel.__next__()
+    excel.__next__() # zeile überspringen
     usr_names = []
     rand_chars = ["!", "%", "&", "(", ")", ",", ".", "_", "-", "=", "^", "#"]
     for line in excel:

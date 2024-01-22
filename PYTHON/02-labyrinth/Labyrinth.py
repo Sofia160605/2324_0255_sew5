@@ -1,4 +1,5 @@
 import argparse
+import cProfile
 from time import sleep
 
 do_print: bool = False
@@ -29,7 +30,7 @@ def suchen(zeile: int, spalte: int, lab: [[str]]):
         return False
 
 
-def suchenAlle(zeile: int, spalte: int, lab: [[str]]):
+def suchen_alle(zeile: int, spalte: int, lab: [[str]]):
 
     x = lab[zeile][spalte]
     if x == 'A':
@@ -41,16 +42,16 @@ def suchenAlle(zeile: int, spalte: int, lab: [[str]]):
         return 0
 
     lab[zeile] = lab[zeile][:spalte] + 'T' + lab[zeile][spalte + 1:]
-    result = suchenAlle(zeile+1, spalte, lab) + \
-             suchenAlle(zeile-1, spalte, lab) + \
-             suchenAlle(zeile, spalte+1, lab) + \
-             suchenAlle(zeile, spalte-1, lab)
+    result = suchen_alle(zeile + 1, spalte, lab) + \
+             suchen_alle(zeile - 1, spalte, lab) + \
+             suchen_alle(zeile, spalte + 1, lab) + \
+             suchen_alle(zeile, spalte - 1, lab)
 
     lab[zeile] = lab[zeile][:spalte] + ' ' + lab[zeile][spalte + 1:]
     return result
 
 
-def makeParser():
+def make_parser():
     global do_print
 
     parser = argparse.ArgumentParser()
@@ -68,12 +69,23 @@ def makeParser():
         ystart = args.ystart if args.ystart else 1
         delay = args.delay
         do_print = args.print
-        print(suchenAlle(xstart, ystart, lab))
+        print(suchen_alle(xstart, ystart, lab))
 
+
+def run_all():
+    lab1 = from_file("resources/l1.txt")
+    lab2 = from_file("resources/l2.txt")
+    lab3 = from_file("resources/l3.txt")
+    print(suchen_alle(5, 5, lab1))
+    print(suchen_alle(5, 5, lab2))
+    print(suchen_alle(5, 5, lab3))
 
 
 if __name__ == '__main__':
-    makeParser()
+    cProfile.run("run_all()")
+    print("done")
+
+    # make_parser()
     # lab: [str] = from_file("resources/l2.txt")
     # print_labyrinth(lab)
     # print("Anzahl gefunden:", suchenAlle(5, 5, lab))
