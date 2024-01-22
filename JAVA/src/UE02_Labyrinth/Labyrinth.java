@@ -163,15 +163,21 @@ public class Labyrinth {
 
 
         lab[zeile][spalte] = ' ';
-
+    
         return result;
 
     }
 
     public static void main(String[] args) throws InterruptedException {
-        char[][] labyrinth = fromFile("Uebungen/JAVA/src/UE02_Labyrinth/resource/l3.txt");
-        printLabyrinth(labyrinth);
-        //System.out.println("Ausgang gefunden: " + (suchen(5, 5, labyrinth) ? "ja" : "nein"));
-        System.out.println("Anzahl Wege: " + suchenAlle(5, 5, labyrinth));
+        long t0 = System.currentTimeMillis();
+        char[][] l1 = fromFile("src/UE02_Labyrinth/resource/l1.txt");
+        char[][] l2 = fromFile("src/UE02_Labyrinth/resource/l2.txt");
+        char[][] l3 = fromFile("src/UE02_Labyrinth/resource/l3.txt");
+//        printLabyrinth(labyrinth);
+//
+        System.out.println("Anzahl Wege l1: " + suchenAlle(5, 5, l1));
+        System.out.println("Anzahl Wege l2: " + suchenAlle(5, 5, l2));
+        System.out.println("Anzahl Wege l3: " + suchenAlle(5, 5, l3));
+        System.out.println("Time take: " + (System.currentTimeMillis() - t0) + "ms");
     }
 }
